@@ -7,16 +7,18 @@ import com.microservice.renault.exception.ResourceNotFoundException;
 import com.microservice.renault.repository.DayOfWeekRepository;
 import com.microservice.renault.repository.GarageRepository;
 import com.microservice.renault.service.GarageService;
-import com.microservice.renault.utils.mapper.GarageMapper;
+import com.microservice.renault.mapper.GarageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,11 +27,12 @@ public class GarageServiceImpl implements GarageService {
 
     private final GarageRepository garageRepository;
 
-    private final DayOfWeekRepository dayOfWeekRepository;;
+    private final DayOfWeekRepository dayOfWeekRepository;
 
     private final GarageMapper garageMapper;
 
 
+    @Transactional
     @Override
     public GarageDto getGarage(Long idGarage) {
          GarageEntity garage = garageRepository.findById(idGarage)
@@ -37,6 +40,7 @@ public class GarageServiceImpl implements GarageService {
          return garageMapper.toDto(garage);
     }
 
+    @Transactional
     @Override
     public GarageDto createGarage(GarageDto garageDto) {
         GarageEntity garage = garageMapper.toEntity(garageDto);
@@ -68,6 +72,7 @@ public class GarageServiceImpl implements GarageService {
     }
 
 
+    @Transactional
     @Override
     public GarageDto updateGarage(GarageDto garageDto, Long idGarage) {
         GarageEntity beforeUpdate = garageRepository.findById(idGarage).orElseThrow(() -> new ResourceNotFoundException("garage","id", String.valueOf(idGarage)));
@@ -77,6 +82,7 @@ public class GarageServiceImpl implements GarageService {
         return garageMapper.toDto(garageRepository.save(garageToUpdate));
     }
 
+    @Transactional
     @Override
     public void deleteGarage(Long idGarage) {
         garageRepository.deleteById(idGarage);
@@ -91,16 +97,15 @@ public class GarageServiceImpl implements GarageService {
             sort = sort.ascending();
         }
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+        PageRequest pageable = PageRequest.of(page, size, sort);
         Page<GarageEntity> garageEntities = garageRepository.findAll(pageable);
         List<GarageDto> listGarages = new ArrayList<>();
-        garageEntities.getContent().forEach(garageEntity -> {
-            listGarages.add(garageMapper.toDto(garageEntity));
-        });
+        garageEntities.getContent().forEach(garageEntity -> listGarages.add(garageMapper.toDto(garageEntity)));
         return listGarages;
 
     }
 
+    @Transactional
     @Override
     public List<GarageDto> searchGaragesByVehicleBrand(String brand) {
         List<GarageEntity> listGarages = garageRepository.findGaragesByVehicleBrand(brand);
@@ -110,6 +115,7 @@ public class GarageServiceImpl implements GarageService {
         return garageMapper.toListDto(listGarages);
     }
 
+    @Transactional
     @Override
     public List<GarageDto> searchGaragesByAccessoryName(String accessoryName) {
         List<GarageEntity> listGarages = garageRepository.findGaragesByAccessoryName(accessoryName);

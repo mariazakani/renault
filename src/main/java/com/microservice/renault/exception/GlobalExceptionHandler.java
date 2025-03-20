@@ -27,10 +27,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public ResponseEntity<ErrorDetailsDto> handleIllegalAccessException(IllegalAccessException exception){
+    @ExceptionHandler(GarageCapacityExceededException.class)
+    public ResponseEntity<ErrorDetailsDto> handleGarageCapacityExceededException(GarageCapacityExceededException exception){
 
         ErrorDetailsDto errorDetails = new ErrorDetailsDto(new Date(), exception.getMessage());
 
-        return  new ResponseEntity<>(errorDetails, HttpStatus.NOT_ACCEPTABLE);
+        return  new ResponseEntity<>(errorDetails, HttpStatus.INSUFFICIENT_STORAGE);
     }
 }

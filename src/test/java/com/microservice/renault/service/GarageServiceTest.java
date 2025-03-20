@@ -9,7 +9,7 @@ import com.microservice.renault.exception.ResourceNotFoundException;
 import com.microservice.renault.repository.DayOfWeekRepository;
 import com.microservice.renault.repository.GarageRepository;
 import com.microservice.renault.service.impl.GarageServiceImpl;
-import com.microservice.renault.utils.mapper.GarageMapper;
+import com.microservice.renault.mapper.GarageMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -38,6 +38,8 @@ public class GarageServiceTest {
 
     private GarageServiceImpl garageService;
 
+    private static final String GARAGE_NAME = "Garage A";
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -45,71 +47,68 @@ public class GarageServiceTest {
     }
 
     @Test
-    void testGetGarage() {
-        Long garageId = 1L;
-        GarageEntity garageEntity = new GarageEntity();
-        garageEntity.setGarageId(garageId);
+    void should_return_garage_when_id_provided() {
+        var garageId = 1L;
+        var garageEntity = GarageEntity.builder()
+                .garageId(garageId)
+                .build();
 
-        GarageDto garageDto = new GarageDto();
-        garageDto.setIdGarage(garageId);
+        var garageDto = GarageDto.builder()
+                .idGarage(garageId).build();
 
         when(garageRepository.findById(garageId)).thenReturn(Optional.of(garageEntity));
         when(garageMapper.toDto(garageEntity)).thenReturn(garageDto);
 
-        GarageDto result = garageService.getGarage(garageId);
+        var result = garageService.getGarage(garageId);
 
         assertNotNull(result);
-        assertEquals(garageId, result.getIdGarage());
+        assertEquals(garageId, result.idGarage());
 
         verify(garageRepository, times(1)).findById(garageId);
         verify(garageMapper, times(1)).toDto(garageEntity);
     }
 
     @Test
-    void testGetGarage_NotFound() {
-        Long garageId = 1L;
+    void should_throw_exception_when_garage_not_found() {
+        var garageId = 1L;
         when(garageRepository.findById(garageId)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> garageService.getGarage(garageId));
         verify(garageRepository, times(1)).findById(garageId);
     }
 
     @Test
-    void testCreateGarage() {
-        GarageDto garageDto = new GarageDto();
-        garageDto.setName("Garage A");
+    void should_create_garage_when_request_body_provided() {
+        var garageDto = GarageDto.builder().name(GARAGE_NAME).build();
 
-        GarageEntity garageEntity = new GarageEntity();
-        garageEntity.setName("Garage A");
+        var garageEntity = GarageEntity.builder().name(GARAGE_NAME).build();
 
-        GarageEntity savedGarageEntity = new GarageEntity();
-        savedGarageEntity.setName("Garage A");
+        var savedGarageEntity = GarageEntity.builder().name(GARAGE_NAME).build();
 
         when(garageMapper.toEntity(garageDto)).thenReturn(garageEntity);
         when(garageMapper.toDto(savedGarageEntity)).thenReturn(garageDto);
         when(garageRepository.save(garageEntity)).thenReturn(savedGarageEntity);
 
-        GarageDto result = garageService.createGarage(garageDto);
+        var result = garageService.createGarage(garageDto);
 
         assertNotNull(result);
-        assertEquals("Garage A", result.getName());
+        assertEquals(GARAGE_NAME, result.name());
 
         verify(garageRepository, times(1)).save(garageEntity);
         verify(garageMapper, times(1)).toDto(savedGarageEntity);
     }
 
     @Test
-    void testUpdateGarage() {
-        Long garageId = 1L;
-        GarageDto garageDto = new GarageDto();
-        garageDto.setName("Updated Garage");
+    void should_update_garage_when_request_body_provided() {
+        var garageId = 1L;
+        var garageDto = GarageDto.builder().name("Updated Garage").build();
 
-        GarageEntity existingGarageEntity = new GarageEntity();
-        existingGarageEntity.setGarageId(garageId);
-        existingGarageEntity.setName("Old Garage");
+        var existingGarageEntity = GarageEntity.builder()
+                .garageId(garageId)
+                .name("Old Garage").build();
 
-        GarageEntity updatedGarageEntity = new GarageEntity();
-        updatedGarageEntity.setGarageId(garageId);
-        updatedGarageEntity.setName("Updated Garage");
+        var updatedGarageEntity = GarageEntity.builder()
+                .garageId(garageId)
+                .name("Updated Garage").build();
 
         when(garageRepository.findById(garageId)).thenReturn(Optional.of(existingGarageEntity));
         when(garageMapper.toEntity(garageDto)).thenReturn(updatedGarageEntity);
@@ -119,15 +118,15 @@ public class GarageServiceTest {
         GarageDto result = garageService.updateGarage(garageDto, garageId);
 
         assertNotNull(result);
-        assertEquals("Updated Garage", result.getName());
+        assertEquals("Updated Garage", result.name());
 
         verify(garageRepository, times(1)).findById(garageId);
         verify(garageRepository, times(1)).save(updatedGarageEntity);
     }
 
     @Test
-    void testDeleteGarage() {
-        Long garageId = 1L;
+    void should_delete_garage_when_id_provided() {
+        var garageId = 1L;
 
         doNothing().when(garageRepository).deleteById(garageId);
 
@@ -137,18 +136,16 @@ public class GarageServiceTest {
     }
 
     @Test
-    void testGetListGarages() {
-        int page = 0;
-        int size = 10;
-        String sortBy = "name";
-        String sortDirection = "asc";
+    void should_return_sorted_list_garages_when_sort_informations_provided() {
+        var page = 0;
+        var size = 10;
+        var sortBy = "name";
+        var sortDirection = "asc";
 
-        GarageDto garageDto = new GarageDto();
-        garageDto.setName("Garage A");
+        var garageDto = GarageDto.builder().name(GARAGE_NAME).build();
 
         List<GarageEntity> garageEntities = new ArrayList<>();
-        GarageEntity garageEntity = new GarageEntity();
-        garageEntity.setName("Garage A");
+        GarageEntity garageEntity = GarageEntity.builder().name(GARAGE_NAME).build();
         garageEntities.add(garageEntity);
 
         Page<GarageEntity> garageEntityPage = new PageImpl<>(garageEntities);
@@ -156,11 +153,11 @@ public class GarageServiceTest {
         when(garageRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Order.by(sortBy))))).thenReturn(garageEntityPage);
         when(garageMapper.toDto(garageEntity)).thenReturn(garageDto);
 
-        List<GarageDto> result = garageService.getListGarages(page, size, sortBy, sortDirection);
+        var result = garageService.getListGarages(page, size, sortBy, sortDirection);
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("Garage A", result.getFirst().getName());
+        assertEquals(GARAGE_NAME, result.getFirst().name());
 
         verify(garageRepository, times(1)).findAll(PageRequest.of(page, size, Sort.by(Sort.Order.by(sortBy))));
         verify(garageMapper, times(1)).toDto(garageEntity);

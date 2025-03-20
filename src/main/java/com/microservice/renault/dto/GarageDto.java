@@ -1,23 +1,20 @@
 package com.microservice.renault.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Map;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class GarageDto {
-    private Long idGarage;
-    private String name;
-    private String address;
-    private String telephone;
-    private String email;
-    private Map<DayOfWeek, List<OpeningTimeDto>> horairesOuverture;
-    private List<VehicleDto> vehicleList;
+@Builder
+public record GarageDto(
+        Long idGarage,
+        String name,
+        String address,
+        String telephone,
+        String email,
+        Map<DayOfWeek, List<OpeningTimeDto>> horairesOuverture,
+        List<VehicleDto> vehicleList
+) {
 
 }

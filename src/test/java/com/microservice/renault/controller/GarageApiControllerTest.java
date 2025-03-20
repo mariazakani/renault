@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @SpringBootTest
@@ -34,63 +35,69 @@ public class GarageApiControllerTest {
 
     private GarageDto garageDto;
 
+    private static final String GARAGE_NAME = "Garage A";
+    private static final String GARAGE_ADDRESS = "123 Street";
+    private static final String GARAGE_EMAIL = "contact@garagea.com";
+    private static final String GARAGE_TEL = "1234567890";
+
     @BeforeEach
     public void setUp() {
-        garageDto = new GarageDto();
-        garageDto.setName("Garage A");
-        garageDto.setAddress("123 Street");
-        garageDto.setEmail("contact@garagea.com");
-        garageDto.setTelephone("1234567890");
+        garageDto = GarageDto.builder()
+                .name(GARAGE_NAME)
+                .address(GARAGE_ADDRESS)
+                .email(GARAGE_EMAIL)
+                .telephone(GARAGE_TEL)
+                .build();
     }
 
     @Test
-    public void testGetGarageInformation() throws Exception {
-        Long garageId = 1L;
+    public void return_garage_information_when_id_provided() throws Exception {
+        var garageId = 1L;
 
         when(garageService.getGarage(garageId)).thenReturn(garageDto);
 
-        mockMvc.perform(get("/garages/{id}", garageId))
+        mockMvc.perform(get("/api/v1/garages/{id}", garageId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Garage A"))
-                .andExpect(jsonPath("$.address").value("123 Street"));
+                .andExpect(jsonPath("$.name").value(GARAGE_NAME))
+                .andExpect(jsonPath("$.address").value(GARAGE_ADDRESS));
 
         verify(garageService, times(1)).getGarage(garageId);
     }
 
     @Test
-    public void testCreateGarage() throws Exception {
+    public void create_garage_when_body_provided() throws Exception {
         when(garageService.createGarage(any(GarageDto.class))).thenReturn(garageDto);
 
-        mockMvc.perform(post("/garages/create")
+        mockMvc.perform(post("/api/v1/garages/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(garageDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Garage A"))
-                .andExpect(jsonPath("$.address").value("123 Street"));
+                .andExpect(jsonPath("$.name").value(GARAGE_NAME))
+                .andExpect(jsonPath("$.address").value(GARAGE_ADDRESS));
 
         verify(garageService, times(1)).createGarage(any(GarageDto.class));
     }
 
     @Test
-    public void testUpdateGarage() throws Exception {
-        Long garageId = 1L;
+    public void update_garage_information_when_body_provided() throws Exception {
+        var garageId = 1L;
         when(garageService.updateGarage(any(GarageDto.class), eq(garageId))).thenReturn(garageDto);
 
-        mockMvc.perform(put("/garage/{id}/update", garageId)
+        mockMvc.perform(put("/api/v1/garages/{id}/update", garageId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(garageDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Garage A"))
-                .andExpect(jsonPath("$.address").value("123 Street"));
+                .andExpect(jsonPath("$.name").value(GARAGE_NAME))
+                .andExpect(jsonPath("$.address").value(GARAGE_ADDRESS));
 
         verify(garageService, times(1)).updateGarage(any(GarageDto.class), eq(garageId));
     }
 
     @Test
-    public void testDeleteGarage() throws Exception {
+    public void delete_garage_when_id_provided() throws Exception {
         Long garageId = 1L;
         doNothing().when(garageService).deleteGarage(garageId);
-        mockMvc.perform(delete("/garage/{id}/delete", garageId))
+        mockMvc.perform(delete("/api/v1/garages/{id}/delete", garageId))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Garage deleted successfully"));
 
@@ -98,18 +105,18 @@ public class GarageApiControllerTest {
     }
 
     @Test
-    public void testGetGarages() throws Exception {
-        List<GarageDto> garages = Arrays.asList(garageDto);
+    public void return_all_list_garage() throws Exception {
+        List<GarageDto> garages = Collections.singletonList(garageDto);
         when(garageService.getListGarages(anyInt(), anyInt(), anyString(), anyString())).thenReturn(garages);
 
-        mockMvc.perform(get("/garages")
+        mockMvc.perform(get("/api/v1/garages/listgarage")
                         .param("page", "0")
                         .param("size", "10")
                         .param("sortBy", "name")
                         .param("sortDirection", "asc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Garage A"))
-                .andExpect(jsonPath("$[0].address").value("123 Street"));
+                .andExpect(jsonPath("$[0].name").value(GARAGE_NAME))
+                .andExpect(jsonPath("$[0].address").value(GARAGE_ADDRESS));
 
         verify(garageService, times(1)).getListGarages(anyInt(), anyInt(), anyString(), anyString());
     }

@@ -5,18 +5,16 @@ import com.microservice.renault.service.AccessoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/v1/accessories")
 public class AccessoryApiController {
 
     private final AccessoryService accessoryService;
 
-    @PostMapping("accessory/create")
+    @PostMapping("/create")
     public ResponseEntity<AccessoryDto> createAccessory(@RequestBody AccessoryDto accessory, @RequestParam String brand){
         return new ResponseEntity<>(accessoryService.createAccessoryForVehicle(accessory, brand), HttpStatus.CREATED);
     }

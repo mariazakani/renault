@@ -1,4 +1,4 @@
-package com.microservice.renault.utils.mapper;
+package com.microservice.renault.mapper;
 
 import com.microservice.renault.dto.GarageDto;
 import com.microservice.renault.dto.OpeningTimeDto;
@@ -31,8 +31,8 @@ public interface GarageMapper {
             DayOfWeek dayOfWeek = entry.getKey();
             for (OpeningTimeDto openingTimeDto : entry.getValue()) {
                 OpeningTimeEntity openingTime = new OpeningTimeEntity();
-                openingTime.setStartDate(openingTimeDto.getStartDate());
-                openingTime.setEndDate(openingTimeDto.getEndDate());
+                openingTime.setStartDate(openingTimeDto.startDate());
+                openingTime.setEndDate(openingTimeDto.startDate());
                 DayOfWeekEntity dayOfWeekEntity = new DayOfWeekEntity();
                 dayOfWeekEntity.setDayName(dayOfWeek.name());
                 openingTime.setDayOfWeek(dayOfWeekEntity);
@@ -54,10 +54,8 @@ public interface GarageMapper {
         if (horairesOuvertureEntity != null) {
             for (OpeningTimeEntity openingTime : horairesOuvertureEntity) {
                 DayOfWeekEntity dayOfWeekEntity = openingTime.getDayOfWeek();
-                OpeningTimeDto openingTimeDto = new OpeningTimeDto();
-                openingTimeDto.setStartDate(openingTime.getStartDate());
-                openingTimeDto.setEndDate(openingTime.getEndDate());
-                result.computeIfAbsent(DayOfWeek.valueOf(dayOfWeekEntity.getDayName()), k -> new ArrayList<>()).add(openingTimeDto);
+                OpeningTimeDto openingTimeDto = new OpeningTimeDto(openingTime.getStartDate(), openingTime.getEndDate());
+                result.computeIfAbsent(DayOfWeek.valueOf(dayOfWeekEntity.getDayName()), _ -> new ArrayList<>()).add(openingTimeDto);
             }
         }
 

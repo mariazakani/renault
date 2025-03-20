@@ -9,35 +9,36 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
 @RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/garages")
 public class GarageApiController {
 
     private final GarageService garageService;
 
-    @GetMapping("garages/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<GarageDto> getGarageInformation(@PathVariable("id") Long garageId){
 
         return new ResponseEntity<>(garageService.getGarage(garageId), HttpStatus.OK);
     }
 
-    @PostMapping("garages/create")
+    @PostMapping("/create")
     public ResponseEntity<GarageDto> createGarage(@RequestBody GarageDto garage){
         return new ResponseEntity<>(garageService.createGarage(garage), HttpStatus.CREATED);
     }
 
-    @PutMapping("garage/{id}/update")
+    @PutMapping("/{id}/update")
     public ResponseEntity<GarageDto> updateGarage(@RequestBody GarageDto garage, @PathVariable("id") Long idGarage){
         return new ResponseEntity<>(garageService.updateGarage(garage, idGarage), HttpStatus.OK);
     }
 
-    @DeleteMapping("garage/{id}/delete")
+    @DeleteMapping("/{id}/delete")
     public ResponseEntity<String> deleteGarage(@PathVariable("id") Long idGarage){
         garageService.deleteGarage(idGarage);
         return ResponseEntity.ok("Garage deleted successfully");
     }
 
-    @GetMapping("/garages")
+    @GetMapping("/listgarage")
     public ResponseEntity<List<GarageDto>> getGarages(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -46,11 +47,11 @@ public class GarageApiController {
         return new ResponseEntity<>(garageService.getListGarages(page, size, sortBy, sortDirection), HttpStatus.OK);
     }
 
-    @GetMapping("search/garages/vehicle/{brand}")
+    @GetMapping("/searchbyvehicle/{brand}")
     public ResponseEntity<List<GarageDto>> searchGaragesByVehicleBrand(@PathVariable String brand){
         return new ResponseEntity<>(garageService.searchGaragesByVehicleBrand(brand), HttpStatus.OK);
     }
-    @GetMapping("search/garages/accessory/{accessory}")
+    @GetMapping("/searchbyaccessory/{accessory}")
     public ResponseEntity<List<GarageDto>> searchGaragesByAccessoryName(@PathVariable("accessory") String accessoryName){
         return new ResponseEntity<>(garageService.searchGaragesByAccessoryName(accessoryName), HttpStatus.OK);
     }

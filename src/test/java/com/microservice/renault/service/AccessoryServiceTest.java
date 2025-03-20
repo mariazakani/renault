@@ -7,7 +7,7 @@ import com.microservice.renault.exception.ResourceNotFoundException;
 import com.microservice.renault.repository.AccessoryRepository;
 import com.microservice.renault.repository.VehicleRepository;
 import com.microservice.renault.service.impl.AccessoryServiceImpl;
-import com.microservice.renault.utils.mapper.AccessoryMapper;
+import com.microservice.renault.mapper.AccessoryMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -38,30 +38,32 @@ public class AccessoryServiceTest {
     private AccessoryEntity accessoryEntity;
     private AccessoryDto accessoryDto;
 
+    private static final String BRAND_RENAULT = "Renault";
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        vehicle = new VehicleEntity();
-        vehicle.setBrand("Renault");
+        vehicle = VehicleEntity.builder().brand("BRAND").build();
 
-        accessoryEntity = new AccessoryEntity();
-        accessoryEntity.setName("accessory1");
-        accessoryEntity.setDescription("descrption accessory");
-        accessoryEntity.setPrice("100");
-        accessoryEntity.setType("type1");
+        accessoryEntity = AccessoryEntity.builder()
+                .name("accessory1")
+                .description("descrption accessory")
+                .price("100")
+                .type("type1").build();
 
-        accessoryDto = new AccessoryDto();
-        accessoryDto.setName("accessory1");
-        accessoryDto.setDescription("descrption accessory");
-        accessoryDto.setPrice("100");
-        accessoryDto.setType("type1");
+
+        accessoryDto = AccessoryDto.builder()
+                .name("accessory1")
+                .description("descrption accessory")
+                .price("100")
+                .type("type1").build();
     }
 
     @Test
-    void createAccessoryForVehicle_returnAccessoryDto_WhenVehicleExists() {
+    void create_accessory_for_vehicle_should_return_accessory_when_vehicle_exists() {
 
-        String brand = "Renault";
+        String brand = BRAND_RENAULT;
         when(vehicleRepository.findByBrand(brand)).thenReturn(Optional.of(vehicle));
         when(accessoryMapper.toEntity(accessoryDto)).thenReturn(accessoryEntity);
         when(accessoryRepository.save(accessoryEntity)).thenReturn(accessoryEntity);
@@ -70,10 +72,10 @@ public class AccessoryServiceTest {
         AccessoryDto result = accessoryServiceImpl.createAccessoryForVehicle(accessoryDto, brand);
 
         assertNotNull(result);
-        assertEquals(accessoryDto.getName(), result.getName());
-        assertEquals(accessoryDto.getDescription(), result.getDescription());
-        assertEquals(accessoryDto.getPrice(), result.getPrice());
-        assertEquals(accessoryDto.getType(), result.getType());
+        assertEquals(accessoryDto.name(), result.name());
+        assertEquals(accessoryDto.description(), result.description());
+        assertEquals(accessoryDto.price(), result.price());
+        assertEquals(accessoryDto.type(), result.type());
 
         verify(vehicleRepository).findByBrand(brand);
         verify(accessoryRepository).save(accessoryEntity);
@@ -81,12 +83,10 @@ public class AccessoryServiceTest {
     }
 
     @Test
-    void createAccessoryForVehicle_throwException_WhenVehicleNotFound() {
-        String brand = "Renault";
+    void create_accessory_for_vehicle_should_throw_exception_when_vehicle_not_found() {
+        String brand = BRAND_RENAULT;
         when(vehicleRepository.findByBrand(brand)).thenReturn(Optional.empty());
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            accessoryServiceImpl.createAccessoryForVehicle(accessoryDto, brand);
-        });
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> accessoryServiceImpl.createAccessoryForVehicle(accessoryDto, brand));
 
         assertEquals("vehicle", exception.getResourceName());
         assertEquals("brand", exception.getFieldName());

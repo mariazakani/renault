@@ -42,10 +42,11 @@ class KafkaProducerTest extends com.microservice.renault.kafka.config.KafkaBaseT
 
     @BeforeAll
     void setUp() {
-        GarageDto garage = new GarageDto();
-        garage.setName("Garage A");
-        garage.setEmail("contact@renault.com");
-        garage.setAddress("Address A");
+        GarageDto garage = GarageDto.builder()
+                .name("Garage A")
+                .email("contact@renault.com")
+                .address("Address A")
+                .build();
         message = garage.toString();
 
     }

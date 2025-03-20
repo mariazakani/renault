@@ -1,16 +1,10 @@
 package com.microservice.renault.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class OpeningTimeDto {
-    private LocalTime startDate;
-    private LocalTime endDate;
+@Builder
+public record OpeningTimeDto(LocalTime startDate, LocalTime endDate) {
+
 }

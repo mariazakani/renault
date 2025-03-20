@@ -9,23 +9,24 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
 @RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/vehicles")
 public class VehicleApiController {
 
     private final VehicleService vehicleService;
 
-    @PostMapping("vehicle/create")
+    @PostMapping("/create")
     public void createVehicle(@RequestBody VehicleDto vehicle){
         vehicleService.createVehicle(vehicle);
     }
 
-    @PostMapping("vehicle/addToGarage")
-    public ResponseEntity<VehicleDto> addVehicleToGarage(@RequestParam String brand, @RequestParam String garageName) throws IllegalAccessException {
+    @PostMapping("/addToGarage")
+    public ResponseEntity<VehicleDto> addVehicleToGarage(@RequestParam String brand, @RequestParam String garageName){
         return new ResponseEntity<>(vehicleService.addVehicleToGarage(brand, garageName), HttpStatus.OK);
     }
 
-    @GetMapping("vehicles/{garageName}")
+    @GetMapping("/{garageName}")
     public ResponseEntity<List<VehicleDto>> getVehicles(@PathVariable String garageName){
         return new ResponseEntity<>(vehicleService.getVehicleForGarage(garageName), HttpStatus.OK);
     }

@@ -3,19 +3,13 @@ package com.microservice.renault.kafka;
 import com.microservice.renault.dto.GarageDto;
 import com.microservice.renault.kafka.consumer.KafkaConsumer;
 import com.microservice.renault.kafka.producer.KafkaProducer;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -32,16 +26,17 @@ public class KafkaConsumerTest /*extends KafkaBaseTest */{
     ArgumentCaptor<Object> valueArgumentCaptor;
     @MockitoSpyBean
     KafkaConsumer consumer;
-    @Autowired
+    //@Autowired
     KafkaProducer producer;
     String message;
 
     //@BeforeAll
     void setUp() {
-        GarageDto garage = new GarageDto();
-        garage.setName("Garage A");
-        garage.setEmail("contact@renault.com");
-        garage.setAddress("Address A");
+        GarageDto garage = GarageDto.builder()
+                .name("Garage A")
+                .email("contact@renault.com")
+                .address("Address A")
+                .build();
         message = garage.toString();
     }
     //@Test

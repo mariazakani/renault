@@ -1,9 +1,7 @@
-package com.microservice.renault.utils.mapper;
+package com.microservice.renault.mapper;
 
 import com.microservice.renault.dto.AccessoryDto;
-import com.microservice.renault.dto.VehicleDto;
 import com.microservice.renault.entity.AccessoryEntity;
-import com.microservice.renault.entity.VehicleEntity;
 import org.mapstruct.Mapper;
 
 import java.util.List;

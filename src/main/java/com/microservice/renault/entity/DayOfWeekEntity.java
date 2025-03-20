@@ -1,11 +1,17 @@
 package com.microservice.renault.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @Entity
 @Table(name = "DayOfWeek")
+@NoArgsConstructor
+@AllArgsConstructor
 public class DayOfWeekEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

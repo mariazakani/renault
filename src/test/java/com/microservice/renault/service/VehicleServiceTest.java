@@ -3,12 +3,12 @@ package com.microservice.renault.service;
 import com.microservice.renault.dto.VehicleDto;
 import com.microservice.renault.entity.GarageEntity;
 import com.microservice.renault.entity.VehicleEntity;
+import com.microservice.renault.exception.GarageCapacityExceededException;
 import com.microservice.renault.exception.ResourceNotFoundException;
+import com.microservice.renault.mapper.VehicleMapper;
 import com.microservice.renault.repository.GarageRepository;
 import com.microservice.renault.repository.VehicleRepository;
 import com.microservice.renault.service.impl.VehicleServiceImpl;
-import com.microservice.renault.utils.mapper.GarageMapper;
-import com.microservice.renault.utils.mapper.VehicleMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -35,8 +35,6 @@ public class VehicleServiceTest {
     @Mock
     private VehicleMapper vehicleMapper;
 
-    @Mock
-    private GarageMapper garageMapper;
 
     @InjectMocks
     private VehicleServiceImpl vehicleServiceImpl;
@@ -46,31 +44,40 @@ public class VehicleServiceTest {
     private GarageEntity garageEntity;
     private VehicleDto vehicleDtoToReturn;
 
+    private static final String BRAND_RENAULT = "Renault";
+    private static final String TYPE_CARBURANT = "Diesel";
+    private static final String FABRICATION_DATE = "2025-03-16";
+    private static final String GARAGE_A = "GarageA";
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        vehicleDto = new VehicleDto();
-        vehicleDto.setBrand("Renault");
-        vehicleDto.setFabricationDate("2025-03-16");
-        vehicleDto.setTypeCarburant("Diesel");
+        vehicleDto = VehicleDto.builder()
+                .brand(BRAND_RENAULT)
+                .fabricationDate(FABRICATION_DATE)
+                .typeCarburant(TYPE_CARBURANT)
+                .build();
 
-        vehicleEntity = new VehicleEntity();
-        vehicleEntity.setBrand("Renault");
-        vehicleEntity.setFabricationDate("2025-03-16");
-        vehicleEntity.setTypeCarburant("Diesel");
+        vehicleEntity = VehicleEntity.builder()
+                .brand(BRAND_RENAULT)
+                .fabricationDate(FABRICATION_DATE)
+                .typeCarburant(TYPE_CARBURANT)
+                .build();
 
-        garageEntity = new GarageEntity();
-        garageEntity.setName("GarageA");
-        garageEntity.setVehicles(new ArrayList<>());
+        garageEntity = GarageEntity.builder()
+                .name(GARAGE_A)
+                .vehicles(new ArrayList<>())
+                .build();
 
-        vehicleDtoToReturn = new VehicleDto();
-        vehicleDtoToReturn.setBrand("Renault");
-        vehicleDtoToReturn.setFabricationDate("2025-03-16");
-        vehicleDtoToReturn.setTypeCarburant("Diesel");
+        vehicleDtoToReturn = VehicleDto.builder()
+                .brand(BRAND_RENAULT)
+                .fabricationDate(FABRICATION_DATE)
+                .typeCarburant(TYPE_CARBURANT)
+                .build();
     }
 
     @Test
-    void createVehicle_ShouldSaveVehicle_WhenVehicleIsValid() {
+    void create_vehicle_should_save_vehicle_when_vehicle_is_valid() {
         when(vehicleMapper.vehicleDtoToEntity(vehicleDto)).thenReturn(vehicleEntity);
         when(vehicleRepository.save(vehicleEntity)).thenReturn(vehicleEntity);
         vehicleServiceImpl.createVehicle(vehicleDto);
@@ -79,9 +86,9 @@ public class VehicleServiceTest {
     }
 
     @Test
-    void addVehicleToGarage_ShouldThrowException_WhenGarageIsFull() {
-        String brand = "Renault";
-        String garageName = "GarageA";
+    void add_vehicle_to_garage_should_throw_exception_when_garage_is_full() {
+        var brand = BRAND_RENAULT;
+        var garageName = GARAGE_A;
 
         for (int i = 0; i < 50; i++) {
             garageEntity.getVehicles().add(new VehicleEntity());
@@ -89,22 +96,18 @@ public class VehicleServiceTest {
         when(garageRepository.findByName(garageName)).thenReturn(Optional.of(garageEntity));
         when(vehicleRepository.findByBrand(brand)).thenReturn(Optional.of(vehicleEntity));
 
-        IllegalAccessException exception = assertThrows(IllegalAccessException.class, () -> {
-            vehicleServiceImpl.addVehicleToGarage(brand, garageName);
-        });
+        GarageCapacityExceededException exception = assertThrows(GarageCapacityExceededException.class, () -> vehicleServiceImpl.addVehicleToGarage(brand, garageName));
 
         assertEquals("Cannot add more vehicles to the garage. Max limit 50", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Max limit 50"));
     }
 
     @Test
-    void addVehicleToGarage_ShouldThrowException_WhenGarageNotFound() {
-        String brand = "Renault";
-        String garageName = "GarageA";
+    void add_vehicle_to_garage_should_throw_exception_when_garage_not_found() {
+        var garageName = GARAGE_A;
         when(garageRepository.findByName(garageName)).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            vehicleServiceImpl.addVehicleToGarage(brand, garageName);
-        });
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> vehicleServiceImpl.addVehicleToGarage(BRAND_RENAULT, garageName));
 
         assertEquals("garage", exception.getResourceName());
         assertEquals("name", exception.getFieldName());
@@ -112,15 +115,13 @@ public class VehicleServiceTest {
     }
 
     @Test
-    void addVehicleToGarage_ShouldThrowException_WhenVehicleNotFound() {
-        String brand = "Renault";
-        String garageName = "Garage 1";
+    void add_vehicle_to_garage_should_throw_exception_when_vehicle_not_found() {
+        var brand = BRAND_RENAULT;
+        var garageName = "Garage 1";
         when(garageRepository.findByName(garageName)).thenReturn(Optional.of(garageEntity));
         when(vehicleRepository.findByBrand(brand)).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            vehicleServiceImpl.addVehicleToGarage(brand, garageName);
-        });
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> vehicleServiceImpl.addVehicleToGarage(brand, garageName));
 
         assertEquals("vehicle", exception.getResourceName());
         assertEquals("brand", exception.getFieldName());
@@ -128,8 +129,8 @@ public class VehicleServiceTest {
     }
 
     @Test
-    void getVehicleForGarage_ShouldReturnVehicleDtos_WhenGarageExists() {
-        String garageName = "GarageA";
+    void should_return_vehicle_when_garage_exists() {
+        var garageName = GARAGE_A;
         List<VehicleEntity> vehicles = new ArrayList<>();
         vehicles.add(vehicleEntity);
         garageEntity.setVehicles(vehicles);
@@ -140,16 +141,14 @@ public class VehicleServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(vehicleDtoToReturn.getBrand(), result.get(0).getBrand());
+        assertEquals(vehicleDtoToReturn.brand(), result.getFirst().brand());
     }
 
     @Test
-    void getVehicleForGarage_ShouldThrowException_WhenGarageNotFound() {
-        String garageName = "GarageA";
+    void get_vehicle_for_garage_should_throw_exception_when_garage_not_found() {
+        var garageName = GARAGE_A;
         when(garageRepository.findByName(garageName)).thenReturn(Optional.empty());
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            vehicleServiceImpl.getVehicleForGarage(garageName);
-        });
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> vehicleServiceImpl.getVehicleForGarage(garageName));
 
         assertEquals("garage", exception.getResourceName());
         assertEquals("name", exception.getFieldName());

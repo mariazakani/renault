@@ -8,7 +8,7 @@ public interface VehicleService {
 
     void createVehicle(VehicleDto vehicleDto);
 
-    VehicleDto addVehicleToGarage(String brand, String garageName) throws IllegalAccessException;
+    VehicleDto addVehicleToGarage(String brand, String garageName);
 
     List<VehicleDto> getVehicleForGarage(String garageName);
 
